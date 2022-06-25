@@ -2046,10 +2046,11 @@ var main_menu= {
 
 	play_button_down: async function () {
 
-		if (anim2.any_on()===true) {
+		if (anim2.any_on()===true || objects.id_cont.visible === true) {
 			sound.play('locked');
 			return
 		};
+
 
 		sound.play('click');
 
