@@ -3456,6 +3456,28 @@ var auth = function() {
 
 			},	
 
+			get_random_name2 : function(e_str) {
+				
+				let rnd_names = ['Crazy','Monkey','Sky','Mad','Doom','Hash','Sway','Ace','Thor'];
+				let chars = '+0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+				if (e_str !== undefined) {
+					
+					let e_num1 = chars.indexOf(e_str[0]) + chars.indexOf(e_str[1]) + chars.indexOf(e_str[2]) +	chars.indexOf(e_str[3]);
+					e_num1 = Math.abs(e_num1) % (rnd_names.length - 1);					
+					let e_num2 = chars.indexOf(e_str[4]).toString()  + chars.indexOf(e_str[5]).toString()  + chars.indexOf(e_str[6]).toString() ;	
+					e_num2 = e_num2.substring(0, 3);
+					return rnd_names[e_num1] + e_num2;					
+					
+				} else {
+
+					let rnd_num = irnd(0, rnd_names.length - 1);
+					let rand_uid = irnd(0, 999999)+ 100;
+					let name_postfix = rand_uid.toString().substring(0, 3);
+					let name =	rnd_names[rnd_num] + name_postfix;				
+					return name;
+				}						
+			},	
+			
 			yandex: function() {
 
 				
