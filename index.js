@@ -3819,7 +3819,7 @@ async function check_daily_reward (last_seen_ts) {
 
 }
 
-function init_game_env(l) {
+async function init_game_env(l) {
 	
 	
 	if (l===1) LANG = 1;
