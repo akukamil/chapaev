@@ -3380,7 +3380,11 @@ var auth = function() {
 
 			init: async function() {
 
-				g_process=function() { help_obj.process()};
+				//анимация лупы
+				some_process.loup_anim=function() {
+					objects.id_loup.x=20*Math.sin(game_tick*8)+90;
+					objects.id_loup.y=20*Math.cos(game_tick*8)+150;
+				}
 
 				let s = window.location.href;
 
@@ -3728,14 +3732,10 @@ var auth = function() {
 				firebase.database().ref("players/"+my_data.uid+"/pic_url").set(my_data.pic_url);
 				//firebase.database().ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
 
+				some_process.loup_anim=function() {};
+					
 				//вызываем коллбэк
 				resolve("ok");
-			},
-
-			process : function () {
-
-				objects.id_loup.x=20*Math.sin(game_tick*8)+90;
-				objects.id_loup.y=20*Math.cos(game_tick*8)+110;
 			}
 		}
 
