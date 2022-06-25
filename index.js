@@ -822,24 +822,25 @@ var online_game = {
 	stop : async function (result) {
 		
 		let res_array = [
-			['my_timeout',LOSE, 'Вы проиграли!\nУ вас закончилось время'],
-			['opp_timeout',WIN , 'Вы выиграли!\nУ соперника закончилось время'],
-			['my_giveup' ,LOSE, 'Вы сдались!'],
-			['opp_giveup' ,WIN , 'Вы выиграли!\nСоперник сдался'],
-			['no_checkers_left',DRAW, 'Ничья'],
-			['only_my_left',WIN , 'Вы выиграли!\nСкинули все шашки соперника.'],
-			['only_opp_left',LOSE, 'Вы проиграли!\nСоперник скинул все ваши шашки.'],
-			['my_no_sync',NOSYNC , 'Похоже вы не захотели начинать игру.'],
-			['opp_no_sync',NOSYNC , 'Похоже соперник не смог начать игру.'],
-			['my_no_connection',LOSE , 'Потеряна связь!\nИспользуйте надежное интернет соединение.']
+			['my_timeout',LOSE, ['Вы проиграли!\nУ вас закончилось время','You lose!\nYou out of time']],
+			['opp_timeout',WIN , ['Вы выиграли!\nУ соперника закончилось время','You win!\nOpponent out of time']],
+			['my_giveup' ,LOSE, ['Вы сдались!','You gave up!']],
+			['opp_giveup' ,WIN , ['Вы выиграли!\nСоперник сдался','You win!\nOpponent gave up!']],
+			['no_checkers_left',DRAW, ['Ничья','Draw!']],
+			['only_my_left',WIN , ['Вы выиграли!\nСкинули все шашки соперника.','You win!\nYou have thrown off all the opponents checkers']],
+			['only_opp_left',LOSE, ['Вы проиграли!\nСоперник скинул все ваши шашки.','You have lost!\nOpponent has thrown off all your checkers']],
+			['my_no_sync',NOSYNC , ['Похоже вы не захотели начинать игру.','It looks like you did not want to start the game']],
+			['opp_no_sync',NOSYNC , ['Похоже соперник не смог начать игру.','It looks like the opponent could not start the game']],
+			['my_no_connection',LOSE , ['Потеряна связь!\nИспользуйте надежное интернет соединение.','Lost connection!\nUse a reliable internet connection']]
 		];
 		
 		clearTimeout(this.timer_id);		
 		
 		let result_row = res_array.find( p => p[0] === result);
-		let result_str = result_row[0];
+		let result_str = result_row[0];		
 		let result_number = result_row[1];
-		let result_info = result_row[2];				
+		let result_info = result_row[2][LANG];
+		
 		let old_rating = my_data.rating;
 		my_data.rating = this.calc_new_rating (my_data.rating, result_number);
 		firebase.database().ref("players/"+my_data.uid+"/rating").set(my_data.rating);
@@ -995,18 +996,20 @@ var bot_game = {
 	stop : async function(result) {
 
 		let res_array = [
-			['my_timeout',LOSE, 'Вы проиграли!\nУ вас закончилось время'],
-			['opp_timeout',WIN , 'Вы выиграли!\nУ соперника закончилось время'],
-			['my_giveup' ,LOSE, 'Вы сдались!'],
-			['opp_giveup' ,WIN , 'Вы выиграли!\nСоперник сдался'],
-			['no_checkers_left',DRAW, 'Ничья'],
-			['only_my_left',WIN , 'Вы выиграли!\nСкинули все шашки соперника.'],
-			['only_opp_left',LOSE, 'Вы проиграли!\nСоперник скинул все ваши шашки.'],
-			['my_stop',DRAW , 'Вы отменили игру.']			
+			['my_timeout',LOSE, ['Вы проиграли!\nУ вас закончилось время','You have lost!\nYou have run out of time']],
+			['opp_timeout',WIN , ['Вы выиграли!\nУ соперника закончилось время','You have won!\nThe opponents time has run out']],
+			['my_giveup' ,LOSE, ['Вы сдались!','You gave up!']],
+			['opp_giveup' ,WIN , ['Вы выиграли!\nСоперник сдался','You have won!Opponent gave up\n']],
+			['no_checkers_left',DRAW, ['Ничья','Draw']],
+			['only_my_left',WIN , ['Вы выиграли!\nСкинули все шашки соперника.','You have won!\nYou have thrown off all the opponents checkers']],
+			['only_opp_left',LOSE, ['Вы проиграли!\nСоперник скинул все ваши шашки.','You have lost!\nOpponent has thrown off all your checkers']],
+			['my_stop',DRAW , ['Вы отменили игру.','You canceled the game']]			
 		];
 		
+	
+		
 		let result_number = res_array.find( p => p[0] === result)[1];
-		let result_info = res_array.find( p => p[0] === result)[2];				
+		let result_info = res_array.find( p => p[0] === result)[2][LANG];				
 			
 		//выключаем элементы
 		objects.timer_cont.visible = false;
