@@ -3855,7 +3855,9 @@ async function init_game_env(l) {
 	}
 
 	app = new PIXI.Application({width:M_WIDTH, height:M_HEIGHT,antialias:false});
-	document.body.appendChild(app.view);
+	let c = document.body.appendChild(app.view);
+	c.style["boxShadow"] = "0 0 15px #000000";
+
 
 	resize();
 	window.addEventListener("resize", resize);
