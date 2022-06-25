@@ -3806,8 +3806,8 @@ async function check_daily_reward (last_seen_ts) {
 	
 	//обновляем время последнего посещения
 	firebase.database().ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
-	//if (cur_day !== last_seen_day)
-		{		
+	if (cur_day !== last_seen_day)
+	{		
 		my_data.money++;
 		firebase.database().ref("players/"+my_data.uid + "/money").set(my_data.money);	
 		
