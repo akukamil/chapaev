@@ -929,8 +929,8 @@ var online_game = {
 			message.add('Добро пожаловать в комнату для сильных игроков )))')
 		}
 	
-		
-		await big_message.show(result_info, `Рейтинг: ${old_rating} > ${my_data.rating}`)
+		await big_message.show(result_info, ['Рейтинг','Rating'][LANG]+`: ${old_rating} > ${my_data.rating}`)
+
 		
 	},
 	
