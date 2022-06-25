@@ -1712,7 +1712,7 @@ var game = {
 
 }
 
-var	show_ad = function(){
+var	show_ad = async function(){
 		
 	if (game_platform==="YANDEX") {			
 		try {
