@@ -3819,8 +3819,14 @@ async function check_daily_reward (last_seen_ts) {
 
 }
 
-function init_game_env() {
-
+function init_game_env(l) {
+	
+	
+	if (l===1) LANG = 1;
+	
+	await load_resources():
+	
+	
 	//убираем загрузочные данные
 	document.getElementById("m_bar").outerHTML = "";
 	document.getElementById("m_progress").outerHTML = "";
@@ -4023,7 +4029,7 @@ function init_game_env() {
 	
 }
 
-function load_resources() {
+function async load_resources() {
 
 	//это нужно удалить потом
 	/*document.body.innerHTML = "Привет!\nДобавляем в игру некоторые улучшения))\nЗайдите через 40 минут.";
@@ -4066,13 +4072,12 @@ function load_resources() {
 	for (var i=0;i<16;i++)
 		game_res.add("sticker_texture_"+i, git_src+"stickers/"+i+".png");
 
-	game_res.load(init_game_env);
 	game_res.onProgress.add(progress);
-
 	function progress(loader, resource) {
-
 		document.getElementById("m_bar").style.width =  Math.round(loader.progress)+"%";
 	}
+	
+	await new Promise((resolve, reject)=> game_res.load(resolve))
 
 }
 
