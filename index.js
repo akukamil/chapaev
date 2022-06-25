@@ -2344,7 +2344,7 @@ var pref = {
 		
 		let new_checker_price = (c_num-7) * 30;
 		if (my_data.money < new_checker_price) {
-			message.add(['Недостаточно средств для апгрейда','Not enough money fot upgrade'][LANG]);
+			message.add(['Недостаточно средств для апгрейда','Not enough money for upgrade'][LANG]);
 			return;				
 		}
 		
@@ -2589,7 +2589,7 @@ var rules = {
 		anim2.add(objects.desktop,{alpha:[0,0.5]}, true, 0.6,'linear');	
 		anim2.add(objects.rules_back_button,{x:[800, objects.lb_back_button.sx]}, true, 0.5,'easeOutCubic');
 		anim2.add(objects.rules_text,{alpha:[0, 1]}, true, 1,'linear');
-		objects.rules_text.text = ['Добро пожаловать в игру Чапаев!\n\nПравила игры очень простые - нужно метким и направленным движением выбить шашки соперника с левого или правого края доски. Есть возможность улучшить характеристики шашек за внутриигровую валюту, а также приобрести дополнительные шашки. Побеждайте соперников в онлайн игре и становитесь лидером.\n\nУдачи!','Welcome to the Chapaev game!\n\nThe rules of the game are very simple - you need to accurately and directionally knock out the opponents checkers from the left or right edge of the board. There is an opportunity to improve the characteristics of checkers for in-game currency, as well as to purchase additional checkers. Defeat your rivals in an online game and become a leader.\n\ngood luck!'][LANG];
+		objects.rules_text.text = ['Добро пожаловать в игру Чапаев!\n\nПравила игры очень простые - нужно метким и направленным движением выбить шашки соперника с левого или правого края доски. Есть возможность улучшить характеристики шашек за внутриигровую валюту, а также приобрести дополнительные шашки. Побеждайте соперников в онлайн игре и становитесь лидером.\n\nУдачи!','Welcome to the Chapaev game!\n\nThe rules of the game are very simple - you need to accurately and directionally knock out the opponents checkers from the left or right edge of the board. There is an opportunity to improve the characteristics of checkers for in-game currency, as well as to purchase additional checkers. Defeat your rivals in an online game and become a leader.\n\nGood luck!'][LANG];
 	},
 	
 	back_button_down : async function() {
