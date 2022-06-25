@@ -3987,6 +3987,7 @@ async function init_game_env(l) {
 		firebase.database().ref("players/"+my_data.uid+"/pic_url").set(my_data.pic_url);				
 		firebase.database().ref("players/"+my_data.uid+"/b_conf").set(pref.b_conf);	
 		firebase.database().ref("players/"+my_data.uid+"/money").set(my_data.money);	
+		firebase.database().ref("players/"+my_data.uid+"/rating").set(my_data.rating);
 		firebase.database().ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
 		
 
