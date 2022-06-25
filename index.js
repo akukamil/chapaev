@@ -3824,7 +3824,7 @@ async function init_game_env(l) {
 	
 	if (l===1) LANG = 1;
 	
-	await load_resources():
+	await load_resources();
 	
 	
 	//убираем загрузочные данные
