@@ -3563,6 +3563,9 @@ var auth = function() {
 
 			crazygames : async function() {
 				
+				//переключаем язык на английский
+				LANG = 1;
+				
 				//запускаем сдк	и получаем информацию о стране			
 				await help_obj.get_cg_user_data();
 								
