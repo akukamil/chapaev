@@ -3374,7 +3374,7 @@ var auth = function() {
 			  })
 			},
 
-			init: function() {
+			init: async function() {
 
 				g_process=function() { help_obj.process()};
 
