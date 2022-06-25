@@ -4029,7 +4029,7 @@ async function init_game_env(l) {
 	
 }
 
-function async load_resources() {
+async function load_resources() {
 
 	//это нужно удалить потом
 	/*document.body.innerHTML = "Привет!\nДобавляем в игру некоторые улучшения))\nЗайдите через 40 минут.";
