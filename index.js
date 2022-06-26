@@ -951,8 +951,7 @@ var online_game = {
 var bot_game = {
 
 	name :'bot',
-	me_conf_play : 0,
-	opp_conf_play : 0,
+	on : 0,
 	b_conf : {24:[7,0,1],25:[7,1,1],26:[7,2,1],27:[7,3,1],28:[7,4,1],29:[7,5,1],30:[7,6,1],31:[7,7,1]},
 	proxy_checkers : [],
 
@@ -965,6 +964,7 @@ var bot_game = {
 
 		//устанавливаем локальный и удаленный статус
 		set_state ({state : 'b'});
+		this.on = 1;
 				
 		//расставляем шашки бота
 		for (let [i, p] of Object.entries(this.b_conf)) {	
@@ -1008,7 +1008,7 @@ var bot_game = {
 		];
 		
 	
-		
+		this.on = 0;
 		let result_number = res_array.find( p => p[0] === result)[1];
 		let result_info = res_array.find( p => p[0] === result)[2][LANG];				
 			
@@ -1048,8 +1048,7 @@ var bot_game = {
 		[my_checkers_left, bot_checkers_left] = board_func.get_checkers_left(objects.checkers);
 		if (my_checkers_left === 0 || bot_checkers_left === 0 )
 			return;
-		
-		
+				
 		let best_data = {};
 		let best_res = -999;
 		for(let a = 0 ; a < 300 ; a++)	{
@@ -1074,7 +1073,7 @@ var bot_game = {
 				best_data = {cid: 31 - rnd_chk,dx:-dx,dy:-dy};
 				best_res = res;
 			}
-			
+			if (this.on === 0)	return;
 			//await new Promise((resolve, reject) => setTimeout(resolve, 20));
 		}				
 			
@@ -1126,7 +1125,8 @@ var bot_game = {
 		
 		//выключаем элементы
 		//objects.timer_cont.visible = false;
-		//objects.sbgb_cont.visible = false;
+		this.on = 0;
+		objects.sbgb_cont.visible = false;
 		
 	}
 
@@ -1206,6 +1206,7 @@ var game = {
 
 	opponent : "",
 	selected_checker : 0,
+	motion_finished : 1,
 	move_finished : function(){},
 	checker_move_func : function(){},
 	mx : 0,
@@ -1452,26 +1453,26 @@ var game = {
 	process_sending_move : function() {
 			
 		//обрабатываем движение и возвращаем указатель завершения
-		let motion_finished = board_func.update_motion(objects.checkers, 1);
+		this.motion_finished = board_func.update_motion(objects.checkers, 1);
 				
 		//проверяем столкновения шашек
 		board_func.update_collisions(objects.checkers, 0, 1);	
 				
 		//если движение завершено завершаем промис движения
-		if (motion_finished === 1)	this.move_finished();			
+		if (this.motion_finished === 1)	this.move_finished();			
 		
 	},
 	
 	process_receiving_move : function() {
 			
 		//обрабатываем движение и возвращаем указатель завершения
-		let motion_finished = board_func.update_motion(objects.checkers, 1);
+		this.motion_finished = board_func.update_motion(objects.checkers, 1);
 			
 		//проверяем столкновения шашек
 		board_func.update_collisions(objects.checkers, 1, 1);		
 		
 		//когда движение завершено завершаем промис движения
-		if (motion_finished === 1)	this.move_finished();			
+		if (this.motion_finished === 1)	this.move_finished();			
 		
 	},
 	
@@ -1650,9 +1651,6 @@ var game = {
 		//ждем завершения движения шашки
 		this.checker_move_func = this.process_receiving_move;
 		await new Promise(function(resolve, reject){game.move_finished = resolve});	
-		
-		
-		//board_func.print(objects.checkers,1);
 		
 		//проверяем сообщение о мине, координаты переворачиваем
 		if (my_role === 'master' && move_data.mine_pos!==undefined && move_data.mine_pos!==-1)
@@ -1962,7 +1960,7 @@ var req_dialog={
 
 	accept: function() {
 
-		if (objects.req_cont.ready===false || objects.req_cont.visible===false)
+		if (objects.req_cont.ready===false || objects.req_cont.visible===false || game.motion_finished === 0)
 			return;
 
 		
@@ -2135,7 +2133,7 @@ var main_menu= {
 var pref = {
 	
 
-	music_on : 1,
+	music_on : 0,
 	b_conf : [],
 	selected_checker : -1,	
 	active : 0,
