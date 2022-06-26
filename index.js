@@ -81,7 +81,8 @@ class player_mini_card_class extends PIXI.Container {
 		
 		//
 		this.rating_bcg = new PIXI.Sprite(game_res.resources.rating_bcg.texture);
-
+		this.rating_bcg.width=200;
+		this.rating_bcg.height=100;
 		
 		this.name1="";
 		this.name2="";
