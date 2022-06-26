@@ -2134,7 +2134,7 @@ var main_menu= {
 var pref = {
 	
 
-	music_on : 0,
+	music_on : 1,
 	b_conf : [],
 	selected_checker : -1,	
 	active : 0,
