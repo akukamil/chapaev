@@ -3815,7 +3815,7 @@ async function check_daily_reward (last_seen_ts) {
 		
 		sound.play('daily_reward');
 
-		objects.dr_title.text=['Ежедневный бонус!\n+3$','Daily reward!\n+3$'][LANG];
+		objects.dr_title.text=['Ежедневный бонус!\n+1$','Daily reward!\n+1$'][LANG];
 		await anim2.add(objects.dr_cont,{alpha:[0, 1]}, true, 1,'linear');
 		await new Promise((resolve, reject) => setTimeout(resolve, 1000));
 		anim2.add(objects.dr_cont,{alpha:[1, 0]}, false, 1,'linear');
