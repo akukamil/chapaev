@@ -456,7 +456,7 @@ var board_func = {
 				c.x = r2(c.x + c.dx);
 				c.y = r2(c.y + c.dy);
 				
-				if ((c.x > 600 || c.x < 200) && (c.ready === true || draw === 0)) {					
+				if ((c.x > 600 || c.x < 200 || c.y > 420 || c.y < 20) && (c.ready === true || draw === 0)) {					
 					if (draw === 1) {
 						
 						sound.play('chk_out');
@@ -547,6 +547,7 @@ var board_func = {
 			}
 		}
 		
+		/*
 		//столкновения со стенами
 		for (let _i = 0 ; _i < num_of_checkers ; _i++) {
 						
@@ -557,7 +558,7 @@ var board_func = {
 			if (top_overlap < 0) { c.y -= top_overlap; c.dy = -c.dy; if (show_boom === 1) sound.play('hit'); }
 			if (bot_overlap > 0) { c.y -= bot_overlap; c.dy = -c.dy; if (show_boom === 1) sound.play('hit');}		
 			
-		}
+		}*/
 		
 		
 		
