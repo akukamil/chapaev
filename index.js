@@ -1962,8 +1962,13 @@ var req_dialog={
 
 	accept: function() {
 
-		if (objects.req_cont.ready===false || objects.req_cont.visible===false || game.motion_finished === 0)
-			return;
+		if (objects.req_cont.ready===false || objects.req_cont.visible===false || game.motion_finished === 0 || objects.big_message_cont.visible === true) {
+			
+			sound.play('locked');
+			return;			
+			
+		}
+
 
 		
 		//устанавливаем окончательные данные оппонента
