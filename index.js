@@ -3971,7 +3971,7 @@ async function init_game_env(l) {
 		check_daily_reward(last_seen_ts);
 		
 		//номер комнаты
-		if (my_data.rating >= 1500)
+		if (my_data.rating >= 551500)
 			room_name= 'states2';			
 		else
 			room_name= 'states';			
