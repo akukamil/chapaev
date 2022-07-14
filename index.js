@@ -1546,11 +1546,11 @@ var game = {
 		
 		//размещаем мину
 		let mine_pos = -1;
-		if (my_role === 'slave') {			
+		/*if (my_role === 'slave') {			
 			let num_of_mines = board_func.get_num_of_mines(objects.checkers);
 			if (num_of_mines < 3)
 				mine_pos = this.add_mine();					
-		}
+		}*/
 		
 		//отправляем оппоненту информацию о ходе
 		this.opponent.send_move({cid : this.selected_checker.id, dx : dx, dy : dy, mine_pos : mine_pos});	
