@@ -2259,7 +2259,7 @@ var pref = {
 	
 	update_buy_checkers_price_data : function() {
 		
-		let p = (Object.keys(this.b_conf).length - 7) * 30;
+		let p = (Object.keys(this.b_conf).length - 7) * 10;
 		objects.bnc_title.text = [`КУПИТЬ ШАШКУ\nЦена: ${p}$`,`BUY CHECKER\nPrice: ${p}$`][LANG];
 		
 	},
@@ -2347,7 +2347,7 @@ var pref = {
 			return;	
 		} 	
 		
-		let new_checker_price = (c_num-7) * 30;
+		let new_checker_price = (c_num-7) * 10;
 		if (my_data.money < new_checker_price) {
 			message.add(['Недостаточно средств для апгрейда','Not enough money for upgrade'][LANG]);
 			return;				
