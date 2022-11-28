@@ -917,19 +917,6 @@ var online_game = {
 			
 		}
 		
-		//проверяем выход в мелкую комнату
-		if (old_rating >= 1500 &&  my_data.rating <1500) {
-			firebase.database().ref(room_name+"/"+my_data.uid).remove();
-			room_name = 'states';
-			message.add('Вы перешли в комнату для слабых игроков (((')
-		}
-		
-		//проверяем выход в большую комнату
-		if (my_data.rating >= 1500 &&  old_rating <1500) {
-			firebase.database().ref(room_name+"/"+my_data.uid).remove();
-			room_name = 'states2';
-			message.add('Добро пожаловать в комнату для сильных игроков )))')
-		}
 	
 		await big_message.show(result_info, ['Рейтинг','Rating'][LANG]+`: ${old_rating} > ${my_data.rating}`)
 
