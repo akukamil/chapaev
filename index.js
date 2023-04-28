@@ -159,6 +159,33 @@ class checkers_class extends PIXI.Container{
 	
 }
 
+class level_button_class extends PIXI.Container{
+	
+	constructor(level) {
+		
+		super();
+		
+		this.level = level;
+		
+		this.bcg = new PIXI.Sprite(gres.level_button_bcg.texture);
+		this.bcg.width = this.bcg.height = 70;
+		this.bcg.anchor.set(0.5,0.5);
+		this.ready = true;
+		this.interactive = true;
+		this.buttonMode = true;
+		this.pointerdown = levels_menu.level_down.bind(this);
+		
+		
+		this.t = new PIXI.BitmapText(this.level.toString(), {fontName: 'mfont',fontSize: 30,align: 'center'});
+		this.t.anchor.set(0.5,0.5);
+		this.t.tint = 0x000000;
+		this.t.visible = true;
+		this.addChild(this.bcg,this.t);
+		
+	}
+	
+}
+
 var anim2 = {
 		
 	c1: 1.70158,
@@ -721,6 +748,9 @@ var online_game = {
 		//догружаем расположение шашек соперника
 		let snapshot = await firebase.database().ref("players/"+opp_data.uid +"/b_conf").once('value');
 		opp_data.b_conf = snapshot.val();
+		
+		//если открыто меню уровней
+		if (objects.level_menu_cont.visibility) levels_menu.close();	
 	
 		//размещаем шашки оппонента
 		for (let [i, p] of Object.entries(opp_data.b_conf)) {
@@ -920,7 +950,11 @@ var online_game = {
 	
 		await big_message.show(result_info, ['Рейтинг','Rating'][LANG]+`: ${old_rating} > ${my_data.rating}`)
 
-
+		//показыаем основное меню
+		main_menu.activate();	
+		
+		//устанавливаем статус в базе данных а если мы не видны то установливаем только скрытое состояние
+		set_state ({state : 'o'});
 		
 	},
 	
@@ -941,10 +975,12 @@ var bot_game = {
 
 	name :'bot',
 	on : 0,
-	b_conf : {24:[7,0,1],25:[7,1,1],26:[7,2,1],27:[7,3,1],28:[7,4,1],29:[7,5,1],30:[7,6,1],31:[7,7,1]},
+	b_conf : {},
 	proxy_checkers : [],
 
 	activate: async function() {
+		
+		this.b_conf=levels_menu.get_b_conf();
 
 		//заполняем массив прокси шашек
 		if (this.proxy_checkers.length === 0)
@@ -957,9 +993,10 @@ var bot_game = {
 				
 		//расставляем шашки бота
 		for (let [i, p] of Object.entries(this.b_conf)) {	
+			//это уже шашки соперника
 			i = 31 - i;			
-			let py = 7 - p[0];
-			let px = 7 - p[1];			
+			let py = p[0];
+			let px = p[1];			
 			objects.checkers[i].y = objects.board.sy + 25 + 10 + py * 50;				
 			objects.checkers[i].x = objects.board.sx + 25 + 10 + px * 50;
 			objects.checkers[i].m = p[2];
@@ -973,7 +1010,7 @@ var bot_game = {
 		//таймер уже не нужен
 		objects.timer_cont.visible = false;
 		objects.game_buttons_cont.visible = false;
-		objects.sbgb_cont.visible = true;
+		objects.sbgb.visible = true;
 		
 		//устанаваем положение таймер хоть он и не задействован
 		objects.timer_cont.x=10;
@@ -1003,20 +1040,31 @@ var bot_game = {
 			
 		//выключаем элементы
 		objects.timer_cont.visible = false;
-		objects.sbgb_cont.visible = false;
+		objects.sbgb.visible = false;
 		
 		//отключаем взаимодейтсвие с доской
 		objects.board.pointerdown = function() {};
 		
 		//воспроизводим звук
-		if (result_number === DRAW || result_number === LOSE)
-			sound.play('lose');
-		else
-			sound.play('win');
+		if (result_number === DRAW || result_number === LOSE){
+			sound.play('lose');			
+			
+			
+		} else {
+			sound.play('win');						
+			my_data.sp_level++;
+			firebase.database().ref("players/"+my_data.uid+"/sp_level").set(my_data.sp_level);	
+		}
+
 		
 		
 		await big_message.show(result_info, ')))')
 		
+		//показыаем основное меню
+		levels_menu.activate();	
+		
+		//устанавливаем статус в базе данных а если мы не видны то установливаем только скрытое состояние
+		set_state ({state : 'o'});
 	},
 
 	make_move: async function() {
@@ -1115,7 +1163,7 @@ var bot_game = {
 		//выключаем элементы
 		//objects.timer_cont.visible = false;
 		this.on = 0;
-		objects.sbgb_cont.visible = false;
+		objects.sbgb.visible = false;
 		
 	}
 
@@ -1228,6 +1276,9 @@ var game = {
 		if (lb.active === 1) lb.close();		
 		if (pref.active === 1) pref.close();		
 		if (rules.active === 1) rules.close();	
+				
+				
+				
 				
 		//инициируем параметры шашек
 		objects.checkers.forEach(c =>{			
@@ -1657,17 +1708,8 @@ var game = {
 
 	},
 	
-	stop : async function (result) {
-				
+	close(){
 		
-		//останавливаем музыку
-		gres.music.sound.stop();
-		
-		//процессинговая функция
-		some_process.main_process = function(){};	
-				
-		await this.opponent.stop(result);
-				
 		objects.scb_cont.visible = false;
 		objects.giveup_dialog.visible=false;
 		objects.board.visible=false;
@@ -1678,27 +1720,34 @@ var game = {
 		objects.sel_chk.visible = false;
 		objects.guide_line.visible = false;
 		objects.guide_point.visible =false;
-		objects.guide_power.visible =false;
+		objects.guide_power.visible =false;		
+		
+		
+	},
+	
+	stop : async function (result) {
+						
+		//останавливаем музыку
+		gres.music.sound.stop();
+		
+		//процессинговая функция
+		some_process.main_process = function(){};	
+				
+		await this.opponent.stop(result);
+				
+		this.close();		
 		
 		//рекламная пауза
 		show_ad();
 		await new Promise((resolve, reject) => setTimeout(resolve, 2000));
 		
-		//показыаем основное меню
-		main_menu.activate();
-
 		//стираем данные оппонента
 		opp_data.uid="";
 		
 		//соперника больше нет
 		this.opponent = "";
-		
-		//показываем социальную панель
-		if (game_platform === 'VK')
-			social_dialog.show();	
+						
 
-		//устанавливаем статус в базе данных а если мы не видны то установливаем только скрытое состояние
-		set_state ({state : 'o'});
 	}
 
 }
@@ -2036,7 +2085,7 @@ var main_menu= {
 		await anim2.add(objects.kolchak,{x:[objects.kolchak.x,1100]}, false, 0.6,'easeInBack');	
 	},
 
-	play_button_down: async function () {
+	play_online_button_down: async function () {
 
 		if (anim2.any_on()===true || objects.id_cont.visible === true) {
 			sound.play('locked');
@@ -2048,6 +2097,21 @@ var main_menu= {
 
 		await this.close();
 		cards_menu.activate();
+
+	},
+
+	play_single_button_down: async function () {
+
+		if (anim2.any_on()===true || objects.id_cont.visible === true) {
+			sound.play('locked');
+			return
+		};
+
+
+		sound.play('click');
+
+		await this.close();
+		levels_menu.activate();
 
 	},
 
@@ -2120,6 +2184,106 @@ var main_menu= {
 			return;			
 		}
 		
+	}
+
+}
+
+levels_menu={
+	
+	levels_data:[	
+		{24:[0,1,1],25:[0,3,1],26:[0,4,1],27:[0,6,1]},{24:[1,0,1],25:[0,3,1],26:[0,4,1],27:[1,7,1]},{24:[1,0,1],25:[0,1,1],26:[0,6,1],27:[1,7,1]},{24:[2,0,1],25:[1,2,1],26:[1,5,1],27:[2,7,1]},{24:[0,2,1],25:[2,2,1],26:[0,5,1],27:[2,5,1]},{24:[2,2,1],25:[2,3,1],26:[2,4,1],27:[2,5,1]},{24:[1,3,1],25:[2,3,1],26:[1,4,1],27:[2,4,1]},{24:[0,0,1],25:[1,2,1],26:[0,3,1],27:[0,4,1],28:[1,5,1],29:[0,7,1]},{24:[0,0,1],25:[1,1,1],26:[0,2,1],27:[0,5,1],28:[1,6,1],29:[0,7,1]},{24:[2,0,1],25:[0,1,1],26:[2,2,1],27:[2,5,1],28:[0,6,1],29:[2,7,1]},{24:[0,0,1],25:[1,1,1],26:[2,2,1],27:[2,5,1],28:[1,6,1],29:[0,7,1]},{24:[0,3,1],25:[1,3,1],26:[2,3,1],27:[0,4,1],28:[1,4,1],29:[2,4,1]},{24:[1,2,1],25:[1,3,1],26:[2,3,1],27:[1,4,1],28:[2,4,1],29:[1,5,1]},{24:[2,2,1],25:[3,2,1],26:[3,3,1],27:[3,4,1],28:[2,5,1],29:[3,5,1]},{24:[1,1,1],25:[2,2,1],26:[1,3,1],27:[1,4,1],28:[2,5,1],29:[1,6,1]},{24:[3,0,1],25:[0,1,1],26:[3,2,1],27:[3,5,1],28:[0,6,1],29:[3,7,1]},{24:[2,1,1],25:[1,3,2],26:[1,4,2],27:[2,6,1]},{24:[1,1,2],25:[2,1,1],26:[1,6,2],27:[2,6,1]},{24:[1,1,2],25:[2,2,1],26:[2,5,1],27:[1,6,2]},{24:[1,1,2],25:[2,1,1],26:[2,2,1],27:[2,5,1],28:[1,6,2],29:[2,6,1]},{24:[2,1,1],25:[1,2,2],26:[2,2,1],27:[2,3,1],28:[2,4,1],29:[1,5,2],30:[2,5,1],31:[2,6,1]},{24:[0,0,2],25:[1,1,1],26:[2,2,1],27:[3,3,1],28:[3,4,1],29:[2,5,1],30:[1,6,1],31:[0,7,2]},{24:[0,3,1],25:[1,3,1],26:[2,3,1],27:[3,3,2],28:[0,4,1],29:[1,4,1],30:[2,4,1],31:[3,4,2]},{24:[0,2,1],25:[2,2,1],26:[1,3,1],27:[2,3,2],28:[1,4,1],29:[2,4,2],30:[0,5,1],31:[2,5,1]},{24:[0,2,1],25:[2,2,1],26:[1,3,1],27:[3,3,2],28:[1,4,1],29:[3,4,2],30:[0,5,1],31:[2,5,1]},{24:[3,0,1],25:[2,1,2],26:[1,2,1],27:[0,3,1],28:[0,4,1],29:[1,5,1],30:[2,6,2],31:[3,7,1]},{24:[1,1,1],25:[2,2,1],26:[1,3,1],27:[3,3,2],28:[1,4,1],29:[3,4,2],30:[2,5,1],31:[1,6,1]},{24:[0,0,1],25:[1,1,1],26:[2,2,1],27:[1,3,1],28:[3,3,2],29:[1,4,1],30:[3,4,2],31:[2,5,1],32:[1,6,1],33:[0,7,1]},{24:[0,0,1],25:[0,1,1],26:[0,2,1],27:[0,3,1],28:[1,3,2],29:[0,4,1],30:[1,4,2],31:[0,5,1],32:[0,6,1],33:[0,7,1]},{24:[1,0,1],25:[1,1,1],26:[1,2,1],27:[1,3,1],28:[2,3,2],29:[1,4,1],30:[2,4,2],31:[1,5,1],32:[1,6,1],33:[1,7,1]},{24:[2,0,1],25:[2,1,1],26:[2,2,1],27:[2,3,1],28:[3,3,2],29:[2,4,1],30:[3,4,2],31:[2,5,1],32:[2,6,1],33:[2,7,1]},{24:[2,0,1],25:[2,1,1],26:[2,2,1],27:[0,3,1],28:[2,3,1],29:[3,3,2],30:[0,4,1],31:[2,4,1],32:[3,4,2],33:[2,5,1],34:[2,6,1],35:[2,7,1]},{24:[0,0,1],25:[1,1,1],26:[0,2,1],27:[2,2,1],28:[1,3,1],29:[3,3,2],30:[1,4,1],31:[3,4,2],32:[0,5,1],33:[2,5,1],34:[1,6,1],35:[0,7,1]},{24:[0,0,1],25:[1,1,1],26:[0,2,1],27:[2,2,1],28:[1,3,1],29:[3,3,2],30:[1,4,1],31:[3,4,2],32:[0,5,1],33:[2,5,1],34:[1,6,1],35:[0,7,1]}																				
+	],
+	
+	selected_level:0,
+	
+	activate(){		
+		objects.level_menu_cont.visible=true;
+		objects.sp_start_button.visible=true;
+		objects.sp_back_button.visible=true;
+		objects.level_frame.visible=true;
+		anim2.add(objects.select_level_header,{y:[-50,objects.select_level_header.sy]}, true, 0.5,'easeInBack');		
+	
+	
+		//располагаем кнопки
+		const x_points=10;
+		const width=800;
+		const margin=100;
+		const x_int=(width-margin*2)/(x_points-1);
+		
+		
+		let i=0;
+		for(y=0;y<4;y++){		
+			for (x=0;x<10;x++){				
+				objects.level_buttons[i].x=margin+x*x_int;
+				objects.level_buttons[i].y=120+y*x_int;
+				
+				if (i>my_data.sp_level)
+					objects.level_buttons[i].alpha=0.5
+				else
+					objects.level_buttons[i].alpha=1
+				i++;
+			}			
+		}
+		
+		//ставим выделене на текущем уровне
+		this.selected_level=my_data.sp_level;
+		objects.level_frame.x=objects.level_buttons[this.selected_level].x;
+		objects.level_frame.y=objects.level_buttons[this.selected_level].y;		
+		
+	
+	},
+	
+	get_b_conf(){
+		
+		
+		return this.levels_data[this.selected_level];
+		
+	},
+	
+	close(){
+		objects.level_menu_cont.visible=false;
+		objects.sp_start_button.visible=false;	
+		objects.sp_back_button.visible=false;
+		anim2.add(objects.select_level_header,{y:[objects.select_level_header.y,-100]}, false, 1.0,'easeInBack');		
+	},
+	
+	level_down(){
+				
+		console.log(this.level)
+		if (this.level>my_data.sp_level){			
+			sound.play('locked');
+			return;
+		}
+		
+		sound.play('click');
+		
+		levels_menu.selected_level=this.level;
+		objects.level_frame.x=this.x;
+		objects.level_frame.y=this.y;
+	},
+	
+	play_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+		
+		sound.play('click');
+		game.activate(bot_game,'slave')
+		this.close();
+	},
+	
+	back_down(){
+		
+		if (anim2.any_on()) {
+			sound.play('locked');
+			return
+		};
+
+		sound.play('click');
+		this.close();
+		main_menu.activate();
 	}
 
 }
@@ -2641,17 +2805,13 @@ var cards_menu={
 
 
 		//отключаем все карточки
-		this.card_i=1;
-		for(let i=1;i<15;i++)
+		this.card_i=0;
+		for(let i=0;i<15;i++)
 			objects.mini_cards[i].visible=false;
 
-		//добавляем карточку ии
-		this.add_cart_ai();
-
-		
 		
 		//подписываемся на изменения состояний пользователей
-		firebase.database().ref(room_name) .on('value', (snapshot) => {cards_menu.players_list_updated(snapshot.val());});
+		firebase.database().ref(room_name).on('value', (snapshot) => {cards_menu.players_list_updated(snapshot.val());});
 
 	},
 
@@ -2740,8 +2900,8 @@ var cards_menu={
 		let num_of_cards = num_of_single + num_of_tables;
 		
 		//если карточек слишком много то убираем столы
-		if (num_of_cards > 14) {
-			let num_of_tables_cut = num_of_tables - (num_of_cards - 14);			
+		if (num_of_cards > 15) {
+			let num_of_tables_cut = num_of_tables - (num_of_cards - 15);			
 			
 			let num_of_tables_to_cut = num_of_tables - num_of_tables_cut;
 			
@@ -2754,7 +2914,7 @@ var cards_menu={
 
 		
 		//убираем карточки пропавших игроков и обновляем карточки оставшихся
-		for(let i=1;i<15;i++) {			
+		for(let i=0;i<15;i++) {			
 			if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'single') {				
 				let card_uid = objects.mini_cards[i].uid;				
 				if (single[card_uid] === undefined)					
@@ -2773,7 +2933,7 @@ var cards_menu={
 		for (let p in single) {
 			
 			let found = 0;
-			for(let i=1;i<15;i++) {			
+			for(let i=0;i<15;i++) {			
 			
 				if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'single') {					
 					if (p ===  objects.mini_cards[i].uid) {
@@ -2790,7 +2950,7 @@ var cards_menu={
 
 		
 		//убираем исчезнувшие столы (если их нет в новом перечне) и оставляем новые
-		for(let i=1;i<15;i++) {			
+		for(let i=0;i<15;i++) {			
 		
 			if (objects.mini_cards[i].visible === true && objects.mini_cards[i].type === 'table') {
 				
@@ -2923,7 +3083,7 @@ var cards_menu={
 
 	place_new_cart: function(params={uid:0, state: "o", name: "XXX", rating: rating}) {
 
-		for(let i=1;i<15;i++) {
+		for(let i=0;i<15;i++) {
 
 			//это если есть вакантная карточка
 			if (objects.mini_cards[i].visible===false) {
@@ -3040,25 +3200,6 @@ var cards_menu={
 		}).then(t=>{			
 			params.tar_obj.texture=t;			
 		})	
-	},
-
-	add_cart_ai: function() {
-
-		//убираем элементы стола так как они не нужны
-		objects.mini_cards[0].rating_text1.visible = false;
-		objects.mini_cards[0].rating_text2.visible = false;
-		objects.mini_cards[0].avatar1.visible = false;
-		objects.mini_cards[0].avatar2.visible = false;
-		objects.mini_cards[0].rating_bcg.visible = false;
-
-		objects.mini_cards[0].bcg.tint=0x777777;
-		objects.mini_cards[0].visible=true;
-		objects.mini_cards[0].uid="AI";
-		objects.mini_cards[0].name=['Чапаев (бот)', 'Chapaev (bot)'][LANG];
-		objects.mini_cards[0].name_text.text=['Чапаев (бот)', 'Chapaev (bot)'][LANG];
-		objects.mini_cards[0].rating_text.text="1400";
-		objects.mini_cards[0].rating=1400;
-		objects.mini_cards[0].avatar.texture=game_res.resources.pc_icon.texture;
 	},
 	
 	card_down : function ( card_id ) {
@@ -3192,25 +3333,12 @@ var cards_menu={
 			return
 		};
 
-		if (cards_menu._opp_data.uid==="AI")
-		{
-			await this.close();
-			
-			//заполняем данные бот-оппонента
-			make_text(objects.opp_card_name,cards_menu._opp_data.name,160);
-			objects.opp_card_rating.text='1400';
-			objects.opp_avatar.texture=objects.invite_avatar.texture;	
-			
-			game.activate(bot_game, 'slave');
-		}
-		else
-		{
-			sound.play('click');
-			objects.invite_button_title.text=['Ждите ответ..','Waiting...'][LANG];
-			firebase.database().ref("inbox/"+cards_menu._opp_data.uid).set({sender:my_data.uid,message:"INV",tm:Date.now()});
-			pending_player=cards_menu._opp_data.uid;
 
-		}
+		sound.play('click');
+		objects.invite_button_title.text=['Ждите ответ..','Waiting...'][LANG];
+		firebase.database().ref("inbox/"+cards_menu._opp_data.uid).set({sender:my_data.uid,message:"INV",tm:Date.now()});
+		pending_player=cards_menu._opp_data.uid;
+
 
 	},
 
@@ -3937,18 +4065,14 @@ async function init_game_env(l) {
 
 		let data=snapshot.val();
 		
-		data===null ?
-			my_data.rating=1400 :
-			my_data.rating = data.rating || 1400;
+		
+		//делаем защиту от неопределенности
+		my_data.rating = (data && data.data) || 1400;
+		my_data.games = (data && data.games) || 0;
+		my_data.money=(data && data.money) || 0;
+		my_data.sp_level=(data && data.sp_level) || 0;
+			
 
-		data===null ?
-			my_data.games = 0 :
-			my_data.games = data.games || 0;
-			
-		data===null ?
-			my_data.money = 0 :
-			my_data.money = data.money || 0;
-			
 		data===null ?
 			pref.b_conf = {24:[7,0,1],25:[7,1,1],26:[7,2,1],27:[7,3,1],28:[7,4,1],29:[7,5,1],30:[7,6,1],31:[7,7,1]} :
 			pref.b_conf = data.b_conf || {24:[7,0,1],25:[7,1,1],26:[7,2,1],27:[7,3,1],28:[7,4,1],29:[7,5,1],30:[7,6,1],31:[7,7,1]};
@@ -3980,6 +4104,7 @@ async function init_game_env(l) {
 		firebase.database().ref("players/"+my_data.uid+"/b_conf").set(pref.b_conf);	
 		firebase.database().ref("players/"+my_data.uid+"/money").set(my_data.money);	
 		firebase.database().ref("players/"+my_data.uid+"/rating").set(my_data.rating);
+		firebase.database().ref("players/"+my_data.uid+"/sp_level").set(my_data.sp_level);
 		firebase.database().ref("players/"+my_data.uid+"/tm").set(firebase.database.ServerValue.TIMESTAMP);
 		
 
@@ -4036,34 +4161,34 @@ async function load_resources() {
 
 
 	let git_src="https://akukamil.github.io/chapaev/"
-	//let git_src=""
+	//git_src=""
 
 
 	game_res=new PIXI.Loader();
 	game_res.add("m2_font", git_src+"/fonts/MS_Comic_Sans/font.fnt");
 
-	game_res.add('receive_move',git_src+'receive_move.mp3');
-	game_res.add('note',git_src+'note.mp3');
-	game_res.add('receive_sticker',git_src+'receive_sticker.mp3');
-	game_res.add('message',git_src+'message.mp3');
-	game_res.add('lose',git_src+'lose.mp3');
-	game_res.add('win',git_src+'win.mp3');
-	game_res.add('click',git_src+'click.mp3');
-	game_res.add('close',git_src+'close.mp3');
-	game_res.add('locked',git_src+'locked.mp3');
-	game_res.add('clock',git_src+'clock.mp3');
-	game_res.add('music',git_src+'music.mp3');
-	game_res.add('hit',git_src+'hit.mp3');
-	game_res.add('blow',git_src+'blow.mp3');
-	game_res.add('chk_out',git_src+'chk_out.mp3');
-	game_res.add('daily_reward',git_src+'daily_reward.mp3');
-	game_res.add('send_chk',git_src+'send_chk.mp3');
-	game_res.add('sel_chk_sound',git_src+'sel_chk.mp3');
+	game_res.add('receive_move',git_src+'sounds/receive_move.mp3');
+	game_res.add('note',git_src+'sounds/note.mp3');
+	game_res.add('receive_sticker',git_src+'sounds/receive_sticker.mp3');
+	game_res.add('message',git_src+'sounds/message.mp3');
+	game_res.add('lose',git_src+'sounds/lose.mp3');
+	game_res.add('win',git_src+'sounds/win.mp3');
+	game_res.add('click',git_src+'sounds/click.mp3');
+	game_res.add('close',git_src+'sounds/close.mp3');
+	game_res.add('locked',git_src+'sounds/locked.mp3');
+	game_res.add('clock',git_src+'sounds/clock.mp3');
+	game_res.add('music',git_src+'sounds/music.mp3');
+	game_res.add('hit',git_src+'sounds/hit.mp3');
+	game_res.add('blow',git_src+'sounds/blow.mp3');
+	game_res.add('chk_out',git_src+'sounds/chk_out.mp3');
+	game_res.add('daily_reward',git_src+'sounds/daily_reward.mp3');
+	game_res.add('send_chk',git_src+'sounds/send_chk.mp3');
+	game_res.add('sel_chk_sound',git_src+'sounds/sel_chk.mp3');
 	
     //добавляем из листа загрузки
     for (var i = 0; i < load_list.length; i++)
         if (load_list[i].class === "sprite" || load_list[i].class === "image" )
-            game_res.add(load_list[i].name, git_src+"res/" + load_list[i].name + "." +  load_list[i].image_format);		
+            game_res.add(load_list[i].name, git_src+"res/RUS/" + load_list[i].name + "." +  load_list[i].image_format);		
 
 	//добавляем текстуры стикеров
 	for (var i=0;i<16;i++)
