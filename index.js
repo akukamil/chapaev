@@ -1737,15 +1737,17 @@ var game = {
 				
 		this.close();		
 		
-		//рекламная пауза
-		show_ad();
-		await new Promise((resolve, reject) => setTimeout(resolve, 2000));
-		
 		//стираем данные оппонента
 		opp_data.uid="";
 		
 		//соперника больше нет
-		this.opponent = "";
+		this.opponent = "";		
+		
+		//рекламная пауза
+		show_ad();
+		await new Promise((resolve, reject) => setTimeout(resolve, 2000));
+		
+
 						
 
 	}
