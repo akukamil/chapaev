@@ -4069,7 +4069,7 @@ async function init_game_env(l) {
 		
 		
 		//делаем защиту от неопределенности
-		my_data.rating = (data && data.data) || 1400;
+		my_data.rating = (data && data.rating) || 1400;
 		my_data.games = (data && data.games) || 0;
 		my_data.money=(data && data.money) || 0;
 		my_data.sp_level=(data && data.sp_level) || 0;
