@@ -3946,7 +3946,7 @@ async function init_game_env(l) {
 		pref.b_conf = other_data.b_conf || {24:[7,0,1],25:[7,1,1],26:[7,2,1],27:[7,3,1],28:[7,4,1],29:[7,5,1],30:[7,6,1],31:[7,7,1]};
 				
 	//время последнего посещения
-	let last_seen_ts = other_data.tm || 1000;
+	let last_seen_ts = (other_data && other_data.tm) || 1000;
 	check_daily_reward(last_seen_ts);
 	
 	//номер комнаты
